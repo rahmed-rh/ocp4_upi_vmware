@@ -1,0 +1,16 @@
+---
+- name: remove ocp4 directories and bootstrap ignition file
+  become: true
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "/var/tmp/ocp4-deployconfigs"
+    - "/var/www/html/bootstrap.ign"
+
+- name: remove hosts from known_hosts file
+  known_hosts:
+    name: "{{ hostvars[item]['name'] }}"
+    state: absent
+  with_items:
+    - "{{ groups['dhcpclients'] }}"

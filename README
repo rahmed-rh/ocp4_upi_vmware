@@ -1,0 +1,22 @@
+Playbook to deploy the helper node for OCP4 deployment
+
+Use this playbook to perform the following steps on the OCP4.1 deployment
+ * Download the installer and clients from Red Hat
+ * Create the required ignition files for deployment
+ * Install apache server to serve the bootstrap ignition files
+ * Create the bootstrap VM, three master VMs and three worker VMs
+ * Configure the DHCP server with static addresses based on VM mac addresses
+
+Pre requisites to run this playbook on a CentOS/RHEL machine:
+ * ansible is installed
+ * access to python and pip packages
+ * Red Hat CoreOS image uploaded and configured WITHOUT a network adapter and a hard drive on vCenter
+ * Access to vCenter APIs from the helper node
+
+Defining the environment:
+ * Create a new inventory file for new deployment
+ * Use inventory.yml as a baseline
+ * Check each setting and match the selected infrastructure
+
+Running the playbook:
+ansible-playbook -i inventory.yml prepare-deployment.yml

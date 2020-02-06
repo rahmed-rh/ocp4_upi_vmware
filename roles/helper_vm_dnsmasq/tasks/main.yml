@@ -1,0 +1,20 @@
+- name: delete old leases
+  file:
+    path: /var/lib/dnsmasq/dnsmasq.leases
+    state: absent
+
+- name: create dnsmasq.conf file
+  template:
+    src: templates/dnsmasq.conf.j2
+    dest: /etc/dnsmasq.conf
+    owner: root
+    group: root
+    mode: '0644'
+    backup: yes
+  register: dnsmasqtempl
+
+- name: restart dnsmasq if needed
+  service:
+    name: dnsmasq
+    state: restarted
+  when: dnsmasqtempl.changed

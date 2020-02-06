@@ -1,0 +1,20 @@
+expand-hosts
+interface={{ ansible_default_ipv4.interface }}
+bogus-priv
+domain={{ domain }}
+cache-size=150
+dhcp-client-update
+{% for host in groups.bootstrap | sort %}
+dhcp-host={{ hostvars[host]['vmnicmac'] | list | join ('\',\'') }},{{ hostvars[host]['name'] }},{{ hostvars[host]['ip'] }},infinite
+{% endfor %}
+{% for host in groups.masters | sort %}
+dhcp-host={{ hostvars[host]['vmnicmac'] | list | join ('\',\'') }},{{ hostvars[host]['name'] }},{{ hostvars[host]['ip'] }},infinite
+{% endfor %}
+{% for host in groups.workers | sort %}
+dhcp-host={{ hostvars[host]['vmnicmac'] | list | join ('\',\'') }},{{ hostvars[host]['name'] }},{{ hostvars[host]['ip'] }},infinite
+{% endfor %}
+dhcp-option=option:dns-server,{{ ext_dns }}
+dhcp-option=option:router,{{ mgmt_gw }}
+dhcp-option=option:ntp-server,{{ ntp_server }}
+dhcp-range={{ mgmt_gw | ipmath (8) }},{{ mgmt_gw | ipmath (28) }},{{ mgmt_nm }},1h
+log-queries

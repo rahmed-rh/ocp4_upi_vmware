@@ -1,0 +1,15 @@
+- name: Gather mac from VM
+  vmware_guest_facts:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: no
+    datacenter: "{{ vmware_datacenter }}"
+    name: "{{ name }}"
+    schema: "vsphere"
+    properties: ["config"]
+  register: vmfacts
+  delegate_to: helper.ocp.example.com
+
+- set_fact:
+    "vmnicmac" : "{{ vmfacts.instance.config.hardware.device | map(attribute='macAddress') | select('string') | list }}"

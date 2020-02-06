@@ -1,0 +1,47 @@
+---
+- name: clean up existing directories
+  hosts: bastion
+  roles:
+  - role: helper_vm_cleanup
+    tags: ['never', 'scratch']
+
+- name: prepare and setup the openshift installer environment
+  hosts: bastion
+  environment:
+    http_proxy: "{{ http_proxy }}"
+    https_proxy: "{{ http_proxy }}"
+  roles:
+  - role: ocp_installer_setup
+    tags: ['scratch']
+
+- name: create bootstrap vm
+  hosts: bastion
+  roles:
+  - role: bootstrap_vm_create
+    tags: ['scratch', 'vms']
+
+- name: create master vms
+  hosts: bastion
+  roles:
+  - role: master_vm_create
+    tags: ['scratch', 'vms']
+
+- name: create worker vms
+  hosts: bastion
+  roles:
+  - role: worker_vm_create
+    tags: ['scratch', 'vms']
+
+- name: get mac addresses from vms
+  hosts: dhcpclients
+  gather_facts: no
+  roles: 
+  - role: get_vm_mac
+    tags: ['scratch', 'vms', 'mac']
+
+- name: configure dnsmasq with new vms
+  hosts: bastion
+  become: true
+  roles: 
+  - role: helper_vm_dnsmasq
+    tags: ['scratch', 'vms', 'dnsmasq']

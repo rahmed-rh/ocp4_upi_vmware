@@ -1,0 +1,44 @@
+---
+- name: create worker vms
+  vmware_guest:
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: no
+    datacenter: "{{ vmware_datacenter }}"
+    cluster: "{{ vmware_cluster }}"
+    folder: "{{ vm_folder }}"
+    name: "{{ hostvars[item]['name'] }}"
+    state: present
+    template: "{{ vmware_template_name }}"
+    disk:
+    - size_gb: "{{ hostvars[item]['disk_size'] }}"
+      type: thin
+      datastore: "{{ hostvars[item]['datastore'] }}"
+    hardware:
+      memory_mb: "{{ hostvars[item]['ram_mb'] }}"
+      num_cpus: "{{ hostvars[item]['cpu'] }}"
+      num_cpu_cores_per_socket: "{{ hostvars[item]['cpu'] }}"
+      scsi: paravirtual
+      memory_reservation_lock: True
+      mem_limit: 16384
+      mem_reservation: 4096
+      cpu_limit: 8096
+      cpu_reservation: 4096
+      hotadd_cpu: True
+      hotremove_cpu: True
+      hotadd_memory: False
+      version: 12
+      boot_firmware: "efi"
+    networks:
+     - name: "{{ hostvars[item]['vmware_network_name'] }}"
+    wait_for_ip_address: no
+    customvalues:
+      - key: "guestinfo.ignition.config.data"
+        value: "{{ lookup('file', '/var/tmp/ocp4-deployconfigs/worker.64') }}"
+      - key: "guestinfo.ignition.config.data.encoding"
+        value: "base64"
+      - key: "disk.EnableUUID"
+        value: "TRUE"
+  with_items:
+    - "{{ groups['workers'] | sort }}"
